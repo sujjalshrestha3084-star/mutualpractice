@@ -19,3 +19,11 @@ export interface User {
     points: number;
     joinDate: string;
 }
+
+interface AuthContextType {
+    user: User | null;
+    logIn: (email: string, password: string) => Promise<User | null>;
+    register: (userData: Omit<User, 'id' | 'points' | 'joinDate'> & { password: string }) => Promise<User>;
+    logOut: () => Promise<void>;
+    loading: boolean;
+}
