@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode} from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, Children} from 'react';
 import{
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -26,4 +26,34 @@ interface AuthContextType {
     register: (userData: Omit<User, 'id' | 'points' | 'joinDate'> & { password: string }) => Promise<User>;
     logOut: () => Promise<void>;
     loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children } : { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    // Helper: Transform Firestore doc to User
+    const buildUserFromDoc = (Id: string, data: any): User => {
+        return {
+            id,
+            name: data.name || '',
+            email: data.email || '',
+            class: data.class,
+            faculty: data.faculty,
+            avatar: data.avatar || '',
+            points: typeof data.points === 'number' ? data.points : 0,
+            joinDate: data.joinDate || new Date().toISOString(),
+        };
+    };
+
+}
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
 }
