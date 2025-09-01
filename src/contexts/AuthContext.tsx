@@ -48,12 +48,42 @@ export function AuthProvider({ children } : { children: ReactNode }) {
         };
     };
 
-}
+    // Listen for Firebase auth change 
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (fbuser: FirebaseUser | null) => {
+            if (fbuser) {
+                try {
+                const uid = fbuser.uid;
+                const userDocRef = doc(db, 'users', uid);
+                const userSnap = await getDoc(userDocRef);
+                if (userSnap.exists()) {
+                    const u = (buildUserFromDoc(uid, userSnap.data()));
+                    setUser(u);
+                } else {
+                    // if there is no profile doc, create a minimal one
+                    const fallback: User = {
+                        id: uid,
+                        name: fbuser.displayName || '',
+                        email: fbuser.email || '',
+                        class: '11',
+                        faculty: 'Science',
+                        avatar: fbuser.photoURL || '',
+                        points: 0,
+                        joinDate: new Date().toISOString(),
+                    };
+                        await setDoc(userDocRef, fallback);
+                        setUser(fallback);
+                }
+            } catch (err) {
+                setUser(null);
+            }
+            } else {
+                setUser(null);
+            }
+            setLoading(false);
+        });
 
-export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+        return () => unsubscribe();
+    }, []);
+
 }
