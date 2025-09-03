@@ -71,6 +71,8 @@ export function AuthProvider({ children } : { children: ReactNode }) {
                         points: 0,
                         joinDate: new Date().toISOString(),
                     };
+
+                    
                         await setDoc(userDocRef, fallback);
                         setUser(fallback);
                 }
@@ -85,5 +87,6 @@ export function AuthProvider({ children } : { children: ReactNode }) {
 
         return () => unsubscribe();
     }, []);
-
+    //Register: create firebase auth user + profile in Firestore
+    
 }
